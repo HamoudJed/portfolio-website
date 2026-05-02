@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Country Explorer – Hamoud Mahdi</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span class="logo-name">Hamoud Mahdi</span>
+      <span class="logo-role">IT Student · KAU</span>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="labs.html">Labs</a>
+      <a href="myworks.html">My Works</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="profile-img">HM</div>
+
+      <div class="sidebar-section">
+        <h3>About This App</h3>
+        <p>Search and explore countries using the REST Countries public API.</p>
+        <p>Data is loaded with JavaScript fetch().</p>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Portfolio Links</h3>
+        <div class="sidebar-links">
+          <a href="myworks.html">← My Works</a>
+          <a href="app1.html">View App 1</a>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="page-hero">
+        <div>
+          <h1>Country Explorer</h1>
+          <p>App 2 – JavaScript app using a public API</p>
+        </div>
+        <span class="page-hero-tag">APP 2</span>
+      </div>
+
+      <section class="app-panel">
+        <h2 class="section-title">Search Countries</h2>
+        <div class="section-divider"></div>
+
+        <form id="countryForm" class="task-form">
+          <input id="countryInput" type="text" placeholder="Search by country name..." aria-label="Country name" />
+          <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+        <p id="statusMessage" class="status-message"></p>
+        <div id="countriesGrid" class="countries-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <p>© 2026 Hamoud Mohammed Mahdi · CPIT-405 Portfolio · ID: 2243091</p>
+  </footer>
+
+  <script>
+    const countryForm = document.getElementById('countryForm');
+    const countryInput = document.getElementById('countryInput');
+    const statusMessage = document.getElementById('statusMessage');
+    const countriesGrid = document.getElementById('countriesGrid');
+
+    function formatNumber(value) {
+      return value ? value.toLocaleString() : 'Unknown';
+    }
+
+    function getLanguages(languages) {
+      if (!languages) return 'Unknown';
+      return Object.values(languages).slice(0, 3).join(', ');
+    }
+
+    function renderCountries(countries) {
+      countriesGrid.innerHTML = '';
+
+      if (!countries || countries.length === 0) {
+        statusMessage.textContent = 'No countries found. Try a different name.';
+        return;
+      }
+
+      statusMessage.textContent = `${countries.length} result(s) found`;
+
+      countries.slice(0, 12).forEach(country => {
+        const card = document.createElement('article');
+        card.className = 'country-card';
+
+        card.innerHTML = `
+          <img src="${country.flags.svg}" alt="Flag of ${country.name.common}" />
+          <h3>${country.name.common}</h3>
+          <p>📍 ${country.capital ? country.capital[0] : 'No capital listed'}</p>
+          <p>🌍 ${country.region}</p>
+          <p>👥 ${formatNumber(country.population)}</p>
+          <p>🗣️ ${getLanguages(country.languages)}</p>
+        `;
+
+        countriesGrid.appendChild(card);
+      });
+    }
+
+    async function searchCountries(name) {
+      const query = name.trim();
+
+      if (!query) {
+        statusMessage.textContent = 'Please type a country name.';
+        countriesGrid.innerHTML = '';
+        return;
+      }
+
+      statusMessage.textContent = 'Loading countries...';
+      countriesGrid.innerHTML = '';
+
+      try {
+        const response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(query)}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            renderCountries([]);
+            return;
+          }
+          throw new Error('Unable to load countries.');
+        }
+
+        const data = await response.json();
+        renderCountries(data);
+      } catch (error) {
+        statusMessage.textContent = 'Error: Could not fetch country data. Please check your internet connection and try again.';
+      }
+    }
+
+    countryForm.addEventListener('submit', event => {
+      event.preventDefault();
+      searchCountries(countryInput.value);
+    });
+
+    searchCountries(countryInput.value);
+  </script>
+
+</body>
+</html>

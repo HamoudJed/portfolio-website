@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager – Hamoud Mahdi</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span class="logo-name">Hamoud Mahdi</span>
+      <span class="logo-role">IT Student · KAU</span>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="labs.html">Labs</a>
+      <a href="myworks.html">My Works</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="profile-img">HM</div>
+
+      <div class="sidebar-section">
+        <h3>About This App</h3>
+        <p>A simple JavaScript task manager that runs fully in the browser without using any external API.</p>
+        <p>Tasks are saved using localStorage.</p>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Portfolio Links</h3>
+        <div class="sidebar-links">
+          <a href="myworks.html">← My Works</a>
+          <a href="app2.html">View App 2</a>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="page-hero">
+        <div>
+          <h1>Task Manager</h1>
+          <p>App 1 – JavaScript without third-party APIs</p>
+        </div>
+        <span class="page-hero-tag">APP 1</span>
+      </div>
+
+      <section class="app-panel">
+        <h2 class="section-title">To-Do List</h2>
+        <div class="section-divider"></div>
+
+        <form id="taskForm" class="task-form">
+          <input id="taskInput" type="text" placeholder="Add a new task..." aria-label="Task name" />
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+
+        <div id="taskList" class="task-list"></div>
+
+        <div class="app-actions">
+          <p id="taskCounter">0 tasks</p>
+          <button id="clearCompleted" class="btn btn-secondary" type="button">Clear Completed</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <p>© 2026 Hamoud Mohammed Mahdi · CPIT-405 Portfolio · ID: 2243091</p>
+  </footer>
+
+  <script>
+    const taskForm = document.getElementById('taskForm');
+    const taskInput = document.getElementById('taskInput');
+    const taskList = document.getElementById('taskList');
+    const taskCounter = document.getElementById('taskCounter');
+    const clearCompleted = document.getElementById('clearCompleted');
+
+    let tasks = JSON.parse(localStorage.getItem('portfolioTasks')) || [];
+
+    function saveTasks() {
+      localStorage.setItem('portfolioTasks', JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = '';
+
+      if (tasks.length === 0) {
+        taskList.innerHTML = '<p class="empty-message">No tasks yet. Add your first task above.</p>';
+      }
+
+      tasks.forEach((task, index) => {
+        const item = document.createElement('div');
+        item.className = task.completed ? 'task-item completed' : 'task-item';
+
+        item.innerHTML = `
+          <label>
+            <input type="checkbox" ${task.completed ? 'checked' : ''} data-index="${index}" />
+            <span>${task.text}</span>
+          </label>
+          <button type="button" data-delete="${index}" aria-label="Delete task">×</button>
+        `;
+
+        taskList.appendChild(item);
+      });
+
+      const completedCount = tasks.filter(task => task.completed).length;
+      taskCounter.textContent = `${completedCount} of ${tasks.length} completed`;
+    }
+
+    taskForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const text = taskInput.value.trim();
+
+      if (!text) {
+        taskInput.focus();
+        return;
+      }
+
+      tasks.push({ text, completed: false });
+      taskInput.value = '';
+      saveTasks();
+      renderTasks();
+    });
+
+    taskList.addEventListener('click', event => {
+      const checkboxIndex = event.target.dataset.index;
+      const deleteIndex = event.target.dataset.delete;
+
+      if (checkboxIndex !== undefined) {
+        tasks[checkboxIndex].completed = event.target.checked;
+        saveTasks();
+        renderTasks();
+      }
+
+      if (deleteIndex !== undefined) {
+        tasks.splice(deleteIndex, 1);
+        saveTasks();
+        renderTasks();
+      }
+    });
+
+    clearCompleted.addEventListener('click', () => {
+      tasks = tasks.filter(task => !task.completed);
+      saveTasks();
+      renderTasks();
+    });
+
+    renderTasks();
+  </script>
+
+</body>
+</html>
