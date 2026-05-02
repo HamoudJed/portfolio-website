@@ -134,7 +134,14 @@
         }
 
         const data = await response.json();
-        renderCountries(data);
+        const normalizedQuery = query.toLowerCase();
+
+        const filteredData = data.filter(country =>
+                country.name.common.toLowerCase().startsWith(normalizedQuery) ||
+                (country.name.official && country.name.official.toLowerCase().startsWith(normalizedQuery))
+        );
+
+        renderCountries(filteredData);
       } catch (error) {
         statusMessage.textContent = 'Error: Could not fetch country data. Please check your internet connection and try again.';
       }
